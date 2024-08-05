@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY BIRTHDAY</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="cake">
+        <div class="plate"></div>
+        <div class="layer layer-bottom"></div>
+        <div class="layer layer-middle"></div>
+        <div class="layer layer-top"></div>
+        <div class="icing"></div>
+        <div class="drip drip1"></div>
+        <div class="drip drip2"></div>
+        <div class="drip drip3"></div>
+        <div class="candle">
+            <div id="flame"></div>
+        </div>
+        <div id="message1" class="message">PARABÉNS SOP !! 🥳(assopra a velinha 🎂)</div>
+        <div id="message2" class="message">Obrigada por ser você e até de longe encher nossa vida de alegria. Espero que esse novo ciclo seja repleto de coisas boas por que você merece demais... Estarei sempre aqui por você !! Te amoooo ✨✨✨</div>
+    </div>
+
+    <script>
+        const flame = document.getElementById('flame');
+        const message1 = document.getElementById('message1');
+        const message2 = document.getElementById('message2');
+
+        // Mostrar a primeira mensagem quando a página é carregada
+        window.onload = () => {
+            message1.style.display = 'block';
+        };
+
+        let message1Displayed = true;
+        let message2Displayed = false;
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then((stream) => {
+                const audioContext = new AudioContext();
+                const analyser = audioContext.createAnalyser();
+                const microphone = audioContext.createMediaStreamSource(stream);
+
+                microphone.connect(analyser);
+                analyser.connect(audioContext.destination);
+
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                function detectBlow() {
+                    analyser.getByteFrequencyData(dataArray);
+                    const average = dataArray.reduce((acc, val) => acc + val, 0) / bufferLength;
+
+                    // Ajuste o limite conforme necessário
+                    const threshold = 50;
+
+                    if (average > threshold && message1Displayed) {
+                        // Oculta a primeira mensagem e mostra a segunda mensagem
+                        message1.style.display = 'none';
+                        message2.style.display = 'block';
+                        message2Displayed = true;
+                        setTimeout(() => {
+                            // Oculta a chama
+                            flame.style.opacity = 0;
+                        }, 1000); // Ajuste o tempo conforme necessário
+                        message1Displayed = false;
+                    } 
+
+                    requestAnimationFrame(detectBlow);
+                }
+
+                detectBlow();
+            })
+            .catch((error) => {
+                console.error('Error accessing microphone:', error);
+            });
+    </script>
+</body>
+</html>
